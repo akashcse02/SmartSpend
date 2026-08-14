@@ -3,7 +3,6 @@
  */
 
 // --- Global State ---
-// usersDB stores { "email@test.com": { password: "123" } }
 let usersDB = JSON.parse(localStorage.getItem('smartspend_users_db')) || {};
 let currentUser = JSON.parse(localStorage.getItem('smartspend_active_user')) || null;
 
@@ -39,16 +38,12 @@ window.onload = () => {
 };
 
 // ==========================================
-// 1. DATA MANAGEMENT (Multi-Account)
+// 1. DATA MANAGEMENT
 // ==========================================
 function loadUserData() {
     if (!currentUser) return;
     const emailKey = currentUser.email;
-    
-    // Load this specific user's transactions
     transactions = JSON.parse(localStorage.getItem(`smartspend_txs_${emailKey}`)) || [];
-    
-    // Load this specific user's profile
     const defaultProfile = { name: '', phone: '', email: emailKey, currency: '৳', budget: 50000 };
     profileSettings = JSON.parse(localStorage.getItem(`smartspend_profile_${emailKey}`)) || defaultProfile;
 }
@@ -97,18 +92,13 @@ authForm.addEventListener('submit', () => {
     }
 
     if (!isLoginMode) {
-        // SIGN UP
         if (usersDB[email]) {
             showError("An account with this email already exists! Please login.");
             return;
         }
-        
         usersDB[email] = { password: password };
         localStorage.setItem('smartspend_users_db', JSON.stringify(usersDB));
-        
         currentUser = { email: email };
-        
-        // Initialize profile for new user
         profileSettings = {
             name: document.getElementById('auth-name').value.trim(),
             phone: document.getElementById('auth-phone').value.trim(),
@@ -117,9 +107,7 @@ authForm.addEventListener('submit', () => {
             budget: 50000
         };
         saveProfileSettings();
-        
     } else {
-        // LOGIN
         if (!usersDB[email] || usersDB[email].password !== password) {
             showError("Invalid email or password!");
             return;
@@ -152,9 +140,11 @@ function showDashboard() {
     authPanel.classList.add('hidden');
     dashboard.classList.remove('hidden');
     
+    // Set default month inputs
     const now = new Date();
     const monthStr = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0');
     document.getElementById('analytics-month').value = monthStr;
+    document.getElementById('dashboard-month').value = monthStr;
 
     updateDashboardStats();
     renderTransactions();
@@ -177,7 +167,10 @@ navLinks.forEach(link => {
         sidebar.classList.remove('open');
 
         if (targetId === 'view-analytics') renderCharts();
-        if (targetId === 'view-dashboard') updateDashboardStats();
+        if (targetId === 'view-dashboard') {
+            updateDashboardStats();
+            renderTransactions(); // Fix: This forces the list to show when switching back
+        }
     });
 });
 
@@ -202,7 +195,7 @@ document.getElementById('expense-form').addEventListener('submit', (e) => {
     transactions.push(newTx);
     saveTransactions();
     e.target.reset();
-    navLinks[0].click(); // Go back to dashboard
+    navLinks[0].click(); 
 });
 
 function deleteTransaction(id) {
@@ -246,26 +239,36 @@ function renderTransactions() {
     });
 }
 
+// Listen for month changes on the dashboard
+document.getElementById('dashboard-month').addEventListener('change', updateDashboardStats);
+
 function updateDashboardStats() {
     let totalBalance = 0;
     let monthlyExpenses = 0;
-    const now = new Date();
-    const currentMonth = now.getMonth();
-    const currentYear = now.getFullYear();
+    
+    // Read the selected month from the dashboard input
+    const selectedMonthStr = document.getElementById('dashboard-month').value;
+    let targetYear, targetMonth;
 
-    // Update the label so the user knows WHICH month is being calculated
-    const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-    document.getElementById('monthly-title').innerText = `Expenses (${monthNames[currentMonth]})`;
+    if (selectedMonthStr) {
+        const parts = selectedMonthStr.split('-');
+        targetYear = parseInt(parts[0]);
+        targetMonth = parseInt(parts[1]) - 1; // JS months are 0-indexed
+    } else {
+        const now = new Date();
+        targetYear = now.getFullYear();
+        targetMonth = now.getMonth();
+    }
 
     transactions.forEach(tx => {
         const txDate = new Date(tx.date);
-        const isCurrentMonth = txDate.getMonth() === currentMonth && txDate.getFullYear() === currentYear;
+        const isTargetMonth = txDate.getMonth() === targetMonth && txDate.getFullYear() === targetYear;
 
         if (tx.type === 'income') {
             totalBalance += tx.amount;
         } else {
             totalBalance -= tx.amount;
-            if (isCurrentMonth) monthlyExpenses += tx.amount;
+            if (isTargetMonth) monthlyExpenses += tx.amount;
         }
     });
 
@@ -273,7 +276,7 @@ function updateDashboardStats() {
     document.getElementById('stat-balance').innerText = `${curr}${totalBalance.toFixed(2)}`;
     document.getElementById('stat-monthly').innerText = `${curr}${monthlyExpenses.toFixed(2)}`;
 
-    // Budget Progress
+    // Budget Progress based on the selected month's expenses
     const budget = profileSettings.budget;
     const progressEl = document.getElementById('budget-progress-bar');
     const budgetText = document.getElementById('budget-text');
@@ -291,7 +294,7 @@ function updateDashboardStats() {
 }
 
 // ==========================================
-// 5. ANALYTICS (Instant Render Design)
+// 5. ANALYTICS
 // ==========================================
 document.getElementById('analytics-month').addEventListener('change', renderCharts);
 
@@ -305,7 +308,6 @@ function renderCharts() {
     const [selYear, selMonth] = selectedMonthStr.split('-').map(Number);
     const expensesOnly = transactions.filter(t => t.type === 'expense');
 
-    // -- Doughnut Chart --
     const catData = {};
     expensesOnly.forEach(tx => {
         const txDate = new Date(tx.date);
@@ -328,11 +330,10 @@ function renderCharts() {
         options: { 
             responsive: true, 
             maintainAspectRatio: false,
-            animation: false // Disabled animation for instant load
+            animation: false 
         }
     });
 
-    // -- Bar Chart --
     let currentTotal = 0;
     let prevTotal = 0;
     let prevYear = selYear;
@@ -369,16 +370,10 @@ function renderCharts() {
         options: {
             responsive: true,
             maintainAspectRatio: false,
-            animation: false, // Disabled animation for instant load
+            animation: false, 
             scales: {
-                y: { 
-                    ticks: { color: textColor },
-                    grid: { color: gridColor }
-                },
-                x: { 
-                    ticks: { color: textColor },
-                    grid: { display: false }
-                }
+                y: { ticks: { color: textColor }, grid: { color: gridColor } },
+                x: { ticks: { color: textColor }, grid: { display: false } }
             },
             plugins: { legend: { display: false } }
         }
@@ -415,7 +410,6 @@ document.getElementById('export-data-btn').addEventListener('click', () => {
         profile: profileSettings,
         transactions: transactions
     };
-    
     const blob = new Blob([JSON.stringify(dataToExport, null, 2)], { type: "text/plain" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
