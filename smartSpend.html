@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SmartSpend</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div id="auth-panel">
+        <h1 id="auth-title">SmartSpend</h1>
+        <p style="margin-bottom: 20px; color: var(--text-secondary);">Welcome back! Please login.</p>
+        
+        <div class="input-group">
+            <label>Email</label>
+            <input type="email" placeholder="Enter your email">
+        </div>
+        <div class="input-group">
+            <label>Password</label>
+            <input type="password" placeholder="Enter your password">
+        </div>
+        
+        <button class="btn" id="login-btn">Login to Dashboard</button>
+        <p class="toggle-auth" id="toggle-auth-btn">Don't have an account? Sign up</p>
+    </div>
+
+    <div id="dashboard" class="hidden">
+        
+        <div class="sidebar">
+            <div class="nav-items">
+                <h2 style="margin-bottom: 30px; color: var(--primary-color);">SmartSpend</h2>
+                <div>Dashboard</div>
+                <div>Add Expense</div>
+                <div>Analytics</div>
+                <div>My Profile</div>
+            </div>
+            <button class="btn" id="logout-btn" style="background-color: #ff5252;">Logout</button>
+        </div>
+
+        <div class="main-content">
+            <div class="header">
+                <h2>Overview</h2>
+                <button class="theme-toggle" id="theme-toggle-btn">Toggle Dark Mode</button>
+            </div>
+            
+
+            <div class="card-grid">
+                <div class="card">
+                    <h3>Total Balance</h3>
+                    <h2 style="color: var(--primary-color); margin-top: 10px;">$2,450.00</h2>
+                </div>
+                <div class="card">
+                    <h3>Monthly Expenses</h3>
+                    <h2 style="color: #ff5252; margin-top: 10px;">$840.00</h2>
+                </div>
+                <div class="card">
+                    <h3>Recent Smart Alert</h3>
+                    <p style="color: var(--text-secondary); margin-top: 10px;">You are currently saving 15% more than last month!</p>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>Recent Transactions</h3>
+                <p style="color: var(--text-secondary); margin-top: 10px;">No recent transactions.</p>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
