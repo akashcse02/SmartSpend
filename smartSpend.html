@@ -3,67 +3,172 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SmartSpend</title>
+    <title>SmartSpend — Expense Tracker</title>
     <link rel="stylesheet" href="style.css">
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
 
+    <!-- LOGIN / SIGNUP PANEL -->
     <div id="auth-panel">
         <h1 id="auth-title">SmartSpend</h1>
-        <p style="margin-bottom: 20px; color: var(--text-secondary);">Welcome back! Please login.</p>
+        <p id="auth-subtitle" style="margin-bottom: 20px; color: var(--text-secondary);">Welcome back! Please login.</p>
         
-        <div class="input-group">
-            <label>Email</label>
-            <input type="email" placeholder="Enter your email">
-        </div>
-        <div class="input-group">
-            <label>Password</label>
-            <input type="password" placeholder="Enter your password">
-        </div>
-        
-        <button class="btn" id="login-btn">Login to Dashboard</button>
+        <form id="auth-form" onsubmit="event.preventDefault();">
+            <div class="input-group">
+                <label>Email</label>
+                <input type="email" id="auth-email" placeholder="Enter your email" required>
+            </div>
+            <div class="input-group">
+                <label>Password</label>
+                <input type="password" id="auth-password" placeholder="Min 6 characters" minlength="6" required>
+            </div>
+            <p id="auth-error" class="error-text hidden"></p>
+            <button type="submit" class="btn" id="auth-submit-btn">Login to Dashboard</button>
+        </form>
         <p class="toggle-auth" id="toggle-auth-btn">Don't have an account? Sign up</p>
     </div>
 
+    <!-- DASHBOARD PANEL -->
     <div id="dashboard" class="hidden">
         
-        <div class="sidebar">
+        <!-- Sidebar -->
+        <div class="sidebar" id="sidebar">
             <div class="nav-items">
                 <h2 style="margin-bottom: 30px; color: var(--primary-color);">SmartSpend</h2>
-                <div>Dashboard</div>
-                <div>Add Expense</div>
-                <div>Analytics</div>
-                <div>My Profile</div>
+                <div class="nav-link active" data-target="view-dashboard">📊 Dashboard</div>
+                <div class="nav-link" data-target="view-add-expense">💸 Add Expense</div>
+                <div class="nav-link" data-target="view-analytics">📈 Analytics</div>
+                <div class="nav-link" data-target="view-profile">👤 My Profile</div>
             </div>
             <button class="btn" id="logout-btn" style="background-color: #ff5252;">Logout</button>
         </div>
 
+        <!-- Main Content -->
         <div class="main-content">
             <div class="header">
-                <h2>Overview</h2>
-                <button class="theme-toggle" id="theme-toggle-btn">Toggle Dark Mode</button>
-            </div>
-            
-
-            <div class="card-grid">
-                <div class="card">
-                    <h3>Total Balance</h3>
-                    <h2 style="color: var(--primary-color); margin-top: 10px;">$2,450.00</h2>
+                <div class="header-left">
+                    <button class="mobile-menu-btn" id="mobile-menu-btn">☰</button>
+                    <h2 id="view-title">Overview</h2>
                 </div>
-                <div class="card">
-                    <h3>Monthly Expenses</h3>
-                    <h2 style="color: #ff5252; margin-top: 10px;">$840.00</h2>
-                </div>
-                <div class="card">
-                    <h3>Recent Smart Alert</h3>
-                    <p style="color: var(--text-secondary); margin-top: 10px;">You are currently saving 15% more than last month!</p>
-                </div>
+                <button class="theme-toggle" id="theme-toggle-btn">🌓 Theme</button>
             </div>
 
-            <div class="card">
-                <h3>Recent Transactions</h3>
-                <p style="color: var(--text-secondary); margin-top: 10px;">No recent transactions.</p>
-            </div>
+            <!-- VIEW: DASHBOARD -->
+            <section id="view-dashboard" class="view-section">
+                <div class="card-grid">
+                    <div class="card">
+                        <h3>Total Balance</h3>
+                        <h2 id="stat-balance" style="color: var(--primary-color); margin-top: 10px;">$0.00</h2>
+                    </div>
+                    <div class="card">
+                        <h3>Monthly Expenses</h3>
+                        <h2 id="stat-monthly" style="color: #ff5252; margin-top: 10px;">$0.00</h2>
+                    </div>
+                    <div class="card">
+                        <h3>Budget Progress</h3>
+                        <div class="progress-container">
+                            <div class="progress-bar" id="budget-progress-bar"></div>
+                        </div>
+                        <p id="budget-text" style="color: var(--text-secondary); margin-top: 10px; font-size: 14px;">$0 / $0</p>
+                    </div>
+                </div>
+
+                <div class="card" style="margin-top: 30px;">
+                    <h3>Recent Transactions</h3>
+                    <div id="transaction-list" class="transaction-list">
+                        <!-- Transactions injected via JS -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- VIEW: ADD EXPENSE -->
+            <section id="view-add-expense" class="view-section hidden">
+                <div class="card" style="max-width: 500px; margin: 0 auto;">
+                    <h3>Add New Transaction</h3>
+                    <form id="expense-form" style="margin-top: 20px;">
+                        <div class="input-group">
+                            <label>Type</label>
+                            <select id="exp-type" required>
+                                <option value="expense">Expense</option>
+                                <option value="income">Income</option>
+                            </select>
+                        </div>
+                        <div class="input-group">
+                            <label>Amount</label>
+                            <input type="number" id="exp-amount" step="0.01" min="0.01" required>
+                        </div>
+                        <div class="input-group">
+                            <label>Category</label>
+                            <select id="exp-category" required>
+                                <option value="Food">Food</option>
+                                <option value="Transport">Transport</option>
+                                <option value="Bills">Bills</option>
+                                <option value="Shopping">Shopping</option>
+                                <option value="Entertainment">Entertainment</option>
+                                <option value="Salary">Salary (Income)</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+                        <div class="input-group">
+                            <label>Date</label>
+                            <input type="date" id="exp-date" required>
+                        </div>
+                        <div class="input-group">
+                            <label>Note (Optional)</label>
+                            <input type="text" id="exp-note">
+                        </div>
+                        <button type="submit" class="btn">Save Transaction</button>
+                    </form>
+                </div>
+            </section>
+
+            <!-- VIEW: ANALYTICS -->
+            <section id="view-analytics" class="view-section hidden">
+                <div class="card-grid">
+                    <div class="card">
+                        <h3>Spending by Category</h3>
+                        <canvas id="categoryChart"></canvas>
+                    </div>
+                    <div class="card">
+                        <h3>6-Month Trend</h3>
+                        <canvas id="trendChart"></canvas>
+                    </div>
+                </div>
+            </section>
+
+            <!-- VIEW: PROFILE -->
+            <section id="view-profile" class="view-section hidden">
+                <div class="card" style="max-width: 500px; margin: 0 auto;">
+                    <h3>Profile Settings</h3>
+                    <form id="profile-form" style="margin-top: 20px;">
+                        <div class="input-group">
+                            <label>Name</label>
+                            <input type="text" id="prof-name" required>
+                        </div>
+                        <div class="input-group">
+                            <label>Email</label>
+                            <input type="email" id="prof-email" required>
+                        </div>
+                        <div class="input-group">
+                            <label>Currency Symbol</label>
+                            <select id="prof-currency" required>
+                                <option value="$">$ (USD)</option>
+                                <option value="€">€ (EUR)</option>
+                                <option value="£">£ (GBP)</option>
+                                <option value="₹">₹ (INR)</option>
+                            </select>
+                        </div>
+                        <div class="input-group">
+                            <label>Monthly Budget Limit</label>
+                            <input type="number" id="prof-budget" step="1" min="0" required>
+                        </div>
+                        <button type="submit" class="btn">Save Profile</button>
+                    </form>
+                </div>
+            </section>
+
         </div>
     </div>
 
