@@ -446,3 +446,19 @@ body {
     .main-content { padding: 20px; }
     .card-grid { grid-template-columns: 1fr; }
 }
+
+
+.date-selector {
+    padding: 10px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    background: var(--bg-color);
+    color: var(--text-primary);
+    font-size: 16px;
+    cursor: pointer;
+}
+
+/* Ensure signup fields transition properly */
+.signup-only {
+    display: block;
+}

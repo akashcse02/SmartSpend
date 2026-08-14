@@ -4,18 +4,25 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SmartSpend — Expense Tracker</title>
-    <link rel="stylesheet" href="./style.css">
-    <!-- Chart.js CDN -->
+    <link rel="stylesheet" href="style.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
 
-    <!-- LOGIN / SIGNUP PANEL -->
     <div id="auth-panel">
         <h1 id="auth-title">SmartSpend</h1>
         <p id="auth-subtitle" style="margin-bottom: 20px; color: var(--text-secondary);">Welcome back! Please login.</p>
         
         <form id="auth-form" onsubmit="event.preventDefault();">
+            <div class="input-group signup-only hidden">
+                <label>Full Name</label>
+                <input type="text" id="auth-name" placeholder="Enter your full name">
+            </div>
+            <div class="input-group signup-only hidden">
+                <label>Phone Number</label>
+                <input type="tel" id="auth-phone" placeholder="Enter your phone number">
+            </div>
+            
             <div class="input-group">
                 <label>Email</label>
                 <input type="email" id="auth-email" placeholder="Enter your email" required>
@@ -30,10 +37,8 @@
         <p class="toggle-auth" id="toggle-auth-btn">Don't have an account? Sign up</p>
     </div>
 
-    <!-- DASHBOARD PANEL -->
     <div id="dashboard" class="hidden">
         
-        <!-- Sidebar -->
         <div class="sidebar" id="sidebar">
             <div class="nav-items">
                 <h2 style="margin-bottom: 30px; color: var(--primary-color);">SmartSpend</h2>
@@ -45,7 +50,6 @@
             <button class="btn" id="logout-btn" style="background-color: #ff5252;">Logout</button>
         </div>
 
-        <!-- Main Content -->
         <div class="main-content">
             <div class="header">
                 <div class="header-left">
@@ -60,18 +64,19 @@
                 <div class="card-grid">
                     <div class="card">
                         <h3>Total Balance</h3>
-                        <h2 id="stat-balance" style="color: var(--primary-color); margin-top: 10px;">$0.00</h2>
+                        <h2 id="stat-balance" style="color: var(--primary-color); margin-top: 10px;">৳0.00</h2>
                     </div>
                     <div class="card">
-                        <h3>Monthly Expenses</h3>
-                        <h2 id="stat-monthly" style="color: #ff5252; margin-top: 10px;">$0.00</h2>
+                        <!-- Updated ID for dynamic month name -->
+                        <h3 id="monthly-title">Monthly Expenses</h3>
+                        <h2 id="stat-monthly" style="color: #ff5252; margin-top: 10px;">৳0.00</h2>
                     </div>
                     <div class="card">
                         <h3>Budget Progress</h3>
                         <div class="progress-container">
                             <div class="progress-bar" id="budget-progress-bar"></div>
                         </div>
-                        <p id="budget-text" style="color: var(--text-secondary); margin-top: 10px; font-size: 14px;">$0 / $0</p>
+                        <p id="budget-text" style="color: var(--text-secondary); margin-top: 10px; font-size: 14px;">৳0 / ৳0</p>
                     </div>
                 </div>
 
@@ -126,13 +131,17 @@
 
             <!-- VIEW: ANALYTICS -->
             <section id="view-analytics" class="view-section hidden">
+                <div class="header" style="margin-bottom: 20px;">
+                    <h3>Select Month to Compare:</h3>
+                    <input type="month" id="analytics-month" class="date-selector">
+                </div>
                 <div class="card-grid">
                     <div class="card">
                         <h3>Spending by Category</h3>
                         <canvas id="categoryChart"></canvas>
                     </div>
                     <div class="card">
-                        <h3>6-Month Trend</h3>
+                        <h3>Previous vs Current Month</h3>
                         <canvas id="trendChart"></canvas>
                     </div>
                 </div>
@@ -148,12 +157,17 @@
                             <input type="text" id="prof-name" required>
                         </div>
                         <div class="input-group">
+                            <label>Phone</label>
+                            <input type="text" id="prof-phone">
+                        </div>
+                        <div class="input-group">
                             <label>Email</label>
-                            <input type="email" id="prof-email" required>
+                            <input type="email" id="prof-email" disabled style="opacity: 0.7;">
                         </div>
                         <div class="input-group">
                             <label>Currency Symbol</label>
                             <select id="prof-currency" required>
+                                <option value="৳">৳ (BDT)</option>
                                 <option value="$">$ (USD)</option>
                                 <option value="€">€ (EUR)</option>
                                 <option value="£">£ (GBP)</option>
@@ -166,6 +180,11 @@
                         </div>
                         <button type="submit" class="btn">Save Profile</button>
                     </form>
+                    
+                    <hr style="margin: 30px 0; border: 1px solid var(--border-color);">
+                    
+                    <h3>Data Management</h3>
+                    <button id="export-data-btn" class="btn" style="background-color: #2196F3; margin-top: 15px;">Export Data to Text File</button>
                 </div>
             </section>
 
